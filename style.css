@@ -1,0 +1,98 @@
+@font-face {
+    font-family: 'Quicksand';
+    src: url(fonts/Quicksand-Regular.otf);
+}
+
+@font-face {
+    font-family: 'Quicksand-bold';
+    src: url(fonts/Quicksand-Bold.otf);
+}
+
+@font-face {
+    font-family: 'Honey-Script';
+    src: url(fonts/HoneyScript-Light.ttf);
+}
+
+* {
+    font-family: 'Quicksand';
+    scroll-behavior: smooth;
+}
+
+.text-bold {
+    font-family: 'Quicksand-bold';
+}
+
+a {
+    color: white;
+}
+
+.logo {
+    height: 100px;
+    background-image: url(resources/waterbuddy.png);
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+}
+
+.title1 {
+    font-family: "Honey-Script";
+    font-size: 40px;
+    letter-spacing: 3px;
+}
+
+.background {
+    background-image: url(resources/waterbuddybg.png);
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+}
+
+.main-background {
+    background-image: url(resources/background-body.svg);
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
+}
+
+.label1 {
+    font-size: 16px;
+}
+
+.label2 {
+    font-size: 16px;
+    font-weight: bold;
+}
+
+sup{
+    color: crimson;
+    font-weight: 900;
+    font-size: medium;
+    top: -0.1em;
+}
+
+.alert-box {
+    width: 100%;
+    display: flex;
+    position: fixed;
+    justify-content: end;
+    z-index: 10000;
+    min-width: 250px;
+}
+
+.alerttab {
+    min-width: 500px;
+    justify-content: center;
+    border: solid;
+    border-width: 1.5px;
+}
+
+.alert-close {
+    position: absolute;
+    margin: 10px 15px;
+    font-size: 20px;
+}
+
+.alert-close:hover {
+    font-size: 23px;
+    cursor: pointer;
+}
