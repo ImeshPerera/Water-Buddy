@@ -1,8 +1,8 @@
     <!-- Alert Boxes Start -->
     <div class="container-fluid">
-        <div class="row">
+        <div class="row justify-content-end">
             <div class="alert-box d-none p-0" id="alertnobox">
-                <div class="alert alert-danger d-flex flex-column align-items-center me-2 mt-2 alerttab" role="alert">
+                <div class="alert alert-danger d-flex flex-column align-items-center me-2 mt-2 alerttab mb-0" role="alert">
                     <div class="d-flex align-items-center point-none">
                         <div class="bi bi-exclamation-triangle">&nbsp;&nbsp;</div>
                         <div id="alertnoline">Someting went Wrong !</div>
@@ -14,7 +14,7 @@
                 <i onclick="alertDangerclose();" class="bi bi-x text-danger alert-close"></i>
             </div>
             <div class="alert-box d-none p-0" id="alertokbox">
-                <div class="alert alert-success d-flex flex-column align-items-center me-2 mt-2 alerttab" role="alert">
+                <div class="alert alert-success d-flex flex-column align-items-center me-2 mt-2 alerttab mb-0" role="alert">
                     <div class="d-flex align-items-center point-none">
                         <div class="bi bi-check2-all">&nbsp;&nbsp;</div>
                         <div id="alertokline">Something Happend !</div>

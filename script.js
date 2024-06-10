@@ -101,6 +101,9 @@ function SignIn() {
             if (text2 == "Success") {
                 alertDangerclose();
                 window.location = "home.php";
+            }else if (text2 == "SuccessAdmin") {
+                alertDangerclose();
+                window.location = "admin.php";
             } else {
                 AlertDanger(text2);
             }
@@ -139,26 +142,36 @@ function BillCalculate() {
     var usage = document.getElementById("usage");
     var bill_preview = document.getElementById("bill_preview");
     var bill_box = document.getElementById("bill_box");
+    var year = document.getElementById("year");
+    var month = document.getElementById("month");
 
-    var form = new FormData();
-    form.append("usage", usage.value);
+    if(year.value == 0 || month.value == 0){
+        AlertDanger('Please select applicable year and month');
+    }else{
+        alertDangerclose();
 
-    var s = new XMLHttpRequest();
+        var form = new FormData();
+        form.append("usage", usage.value);
+        form.append("year", year.textContent);
+        form.append("month", month.options[month.selectedIndex].text);
 
-    s.onreadystatechange = function() {
-        if (s.readyState == 4) {
-            var text2 = s.responseText;
-            if (text2 == "Success") {
-                AlertDanger(text2);
-            } else {
-                bill_box.classList.remove('d-none');
-                bill_preview.innerHTML = text2;                
+        var s = new XMLHttpRequest();
+
+        s.onreadystatechange = function() {
+            if (s.readyState == 4) {
+                var text2 = s.responseText;
+                if (text2 == "Success") {
+                    AlertDanger(text2);
+                } else {
+                    bill_box.classList.remove('d-none');
+                    bill_preview.innerHTML = text2;                
+                }
             }
-        }
-    };
+        };
 
-    s.open("POST", "process/process3.php", true);
-    s.send(form);
+        s.open("POST", "process/process3.php", true);
+        s.send(form);
+    }
 }
 
 function submitbill(){
@@ -166,6 +179,8 @@ function submitbill(){
     var billfinalvalue = document.getElementById("billfinalvalue");
     var year = document.getElementById("year");
     var month = document.getElementById("month");
+    var usage = document.getElementById("usage");
+    var bill_box = document.getElementById("bill_box");
     alert('Hi');
     if(billuse > '0'){
         var form = new FormData();
@@ -173,6 +188,8 @@ function submitbill(){
         form.append("billfinalvalue", billfinalvalue.textContent);
         form.append("year", year.value);
         form.append("month", month.value);
+        form.append("yearname", year.textContent);
+        form.append("monthname", month.options[month.selectedIndex].text);
 
         var s = new XMLHttpRequest();
 
@@ -181,7 +198,10 @@ function submitbill(){
                 var text2 = s.responseText;
                 if (text2 == "Success") {
                     AlertSuccess('Saving Process is Success !');
-                    alertDangerclose();
+                    showmonths('year'+year.value);
+                    usage.value = "";
+                    bill_box.classList.add('d-none');
+                    loadextable();                    
                 } else {
                     AlertDanger(text2);        
                 }
@@ -193,4 +213,88 @@ function submitbill(){
     }else{
 
     }
+}
+
+function showmonths(z) {
+    var selected = document.getElementById(z);
+    var dropdownbtn = document.getElementById("year");
+    var month = document.getElementById("month");
+    dropdownbtn.innerText = selected.innerText;
+    dropdownbtn.value = selected.value;
+
+    var p = new XMLHttpRequest();
+    p.onreadystatechange = function() {
+        if (p.readyState == 4) {
+            var text = p.responseText;
+            month.innerHTML = text;
+        }
+    }
+    p.open("POST", "process/process5.php", true);
+    p.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+    p.send("yearid=" + selected.value);
+}
+
+function ExBillCalculate(z) {
+    var usage = document.getElementById("exuse"+z);
+    var extariff = document.getElementById("extariff"+z);
+    var exmonth = document.getElementById("exdate"+z);
+
+    var modelbody = document.getElementById("modelbody");
+    var modelhead = document.getElementById("staticBackdropLabel");
+    
+    var form = new FormData();
+    form.append("usage", usage.textContent);
+    form.append("extariff", extariff.value);
+
+    var s = new XMLHttpRequest();
+
+    s.onreadystatechange = function() {
+        if (s.readyState == 4) {
+            var text2 = s.responseText;
+            if (text2 == "Success") {
+                AlertDanger(text2);
+            } else {
+                modelhead.innerText = "Detail bill of "+exmonth.textContent;
+                modelbody.innerHTML = text2;                
+            }
+        }
+    };
+
+    s.open("POST", "process/process3.php", true);
+    s.send(form);
+
+}
+
+function loadextable(){
+    var tablelocation = document.getElementById("extable");
+
+    var s = new XMLHttpRequest();
+    s.onreadystatechange = function() {
+        if (s.readyState == 4) {
+            var text2 = s.responseText;
+            if (text2 == "Success") {
+                AlertDanger(text2);
+            } else {
+                tablelocation.innerHTML = text2;                
+            }
+        }
+    };
+
+    s.open("GET", "process/process6.php", true);
+    s.send();
+}
+
+function SignOut() {
+
+    var r = new XMLHttpRequest();
+    r.onreadystatechange = function() {
+        if (r.readyState == 4) {
+            var text6 = r.responseText;
+            if (text6 == "Success") {
+                window.location = "index.php";
+            } else {}
+        }
+    }
+    r.open("GET", "process/process7.php", true);
+    r.send();
 }

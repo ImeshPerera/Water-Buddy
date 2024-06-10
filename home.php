@@ -1,6 +1,7 @@
 <?php
 
 session_start();
+if(isset($_SESSION["myuser"])){
 
 $dbserver = "localhost";
 $dblocation = "root";
@@ -8,6 +9,18 @@ $dbpassword = "Dilshan@1234";
 $dbname = "waterbills";
 
 $dbms = new mysqli($dbserver, $dblocation, $dbpassword, $dbname, "3306");
+
+function formatNumber($number) {
+    $formattedNumber = number_format((float)$number, 2, '.', '');
+    if (strpos($formattedNumber, '.') !== false) {
+        list($whole, $decimal) = explode('.', $formattedNumber);
+        $whole = number_format((int)$whole);
+        $formattedNumber = $whole . '.' . $decimal;
+    } else {
+        $formattedNumber = number_format((int)$formattedNumber);
+    }    
+    return $formattedNumber;
+}
 
 ?>
 <!DOCTYPE html>
@@ -28,15 +41,16 @@ $dbms = new mysqli($dbserver, $dblocation, $dbpassword, $dbname, "3306");
     <!-- Alert Boxes Start -->
     <?php require "alert.php"; ?>
     <!-- Alert Boxes End -->
-    <div class="container-fluid min-vh-100 d-flex align-content-center">
+    <div class="container-fluid min-vh-100 d-flex align-content-center pt-5">
         <div class="row align-content-sm-center">
             <!-- header -->
             <div class="col-12">
+                <button class="btn btn-outline-secondary w-auto position-absolute ms-2 ms-md-5" onclick="SignOut();"> Logout </button>
                 <div class="row">
                     <div class="col-12 logo">
                     </div>
                     <div class="col-12">
-                        <p class="text-center title1">Hi, Welcome <?php echo $_SESSION["user"]["name"]; ?></p>
+                        <p class="text-center title1">Hi, Welcome <?php echo $_SESSION["myuser"]["name"]; ?></p>
                     </div>
                 </div>
             </div>
@@ -51,30 +65,31 @@ $dbms = new mysqli($dbserver, $dblocation, $dbpassword, $dbname, "3306");
                     </div>
                     <div class="col-6 col-md-3">
                         <label class="form-lable">Year</label>
-                        <select id="year" class="form-control">
+                        <div class="dropdown">
+                            <button class="form-control dropdown-toggle" type="button" value="0" id="year" data-bs-toggle="dropdown" aria-expanded="false">
+                                Select Year
+                            </button>
+                            <ul class="dropdown-menu w-100" aria-labelledby="year">
                             <?php
-                            $query ="SELECT `name` FROM years ;";
-                            $result = $dbms -> query($query);
-                            $in = $result->num_rows;
-                            for($i=1; $i<=$in; $i++){
-                                $data = $result->fetch_assoc();
-                                ?><option value="<?php echo $i; ?>"><?php echo $data["name"]; ?></option><?php
+                                $query ="SELECT * FROM years ;";
+                                $result = $dbms -> query($query);
+                                $in = $result->num_rows;
+                                for($i=1; $i<=$in; $i++){
+                                    $data = $result->fetch_assoc();
+                                ?>
+                                <li><button onclick="showmonths('<?php echo 'year'.$data['id'];?>');"
+                                        value="<?php echo $data["id"];?>" id="<?php echo "year".$data['id'];?>"
+                                        class="dropdown-item"><?php echo $data["name"];?></button></li>
+                            <?php
                             }
                             ?>
-                        </select>
+                            </ul>
+                        </div>
                     </div>
                     <div class="col-6 col-md-3">
                         <label class="form-lable">Month</label>
                         <select id="month" class="form-control">
-                            <?php
-                            $query ="SELECT `name` FROM months ;";
-                            $result = $dbms -> query($query);
-                            $in = $result->num_rows;
-                            for($i=1; $i<=$in; $i++){
-                                $data = $result->fetch_assoc();
-                                ?><option value="<?php echo $i; ?>"><?php echo $data["name"]; ?></option><?php
-                            }
-                            ?>
+                            <option value="0">Select Month</option>
                         </select>
                     </div>
                     <div class="col-12 col-md-6">
@@ -146,25 +161,30 @@ $dbms = new mysqli($dbserver, $dblocation, $dbpassword, $dbname, "3306");
                     </div>
                     <div class="col-12 mt-4">
                         <div class="row justify-content-center">
-                            <table class="table w-75">
+                            <table id="extable" class="table w-75">
                                 <tr class="table-secondary">
                                     <th class="text-center">Year & Month</th>
                                     <th class="text-center">Consumption of the month (kWh)</th>
                                     <th class="text-end pe-3 pe-md-5">Charge (Rs.)</th>
                                     <th class="text-center">Detail Bill</th>
                                 </tr>
-                                <tr class="table-light">
-                                    <td class="text-center align-middle">2024-06</td>
-                                    <td class="text-center align-middle">205</td>
-                                    <td class="text-end align-middle pe-3 pe-md-5">1500.00</td>
-                                    <td><button class="btn btn-dark w-100" onclick="">Your Bill</button></td>
-                                </tr>
-                                <tr class="table-light">
-                                    <td class="text-center align-middle">2024-07</td>
-                                    <td class="text-center align-middle">408</td>
-                                    <td class="text-end align-middle pe-3 pe-md-5">2200.00</td>
-                                    <td><button class="btn btn-dark w-100" onclick="">Your Bill</button></td>
-                                </tr>
+                                <?php
+                                    $querya ="SELECT bill.id, years.name AS `yearname`, months.name AS `monthname`, bill.tariff_id, bill_tariff.upfrom, bill_tariff.tilfor, bill.units, bill.total FROM years INNER JOIN months LEFT JOIN bill ON months.id = bill.month_id AND years.id = bill.year_id LEFT JOIN bill_tariff ON bill.tariff_id = bill_tariff.id WHERE bill.customer_id = '".$_SESSION["myuser"]["id"]."' ORDER BY year_id, month_id;";
+                                    $resulta = $dbms -> query($querya);
+                                    $nr = $resulta->num_rows;
+                                    for($j=1; $j<=$nr; $j++){
+                                        $dataa = $resulta->fetch_assoc();
+                                    ?>
+                                    <tr class="table-light">
+                                        <td class="text-start align-middle" id="<?php echo "exdate".$j ;?>"><?php echo $dataa['yearname'].'-'.$dataa['monthname'] ;?></td>
+                                        <input type="hidden" id="<?php echo "extariff".$j ;?>" value="<?php echo $dataa["tariff_id"];?>">
+                                        <td class="text-center align-middle" id="<?php echo "exuse".$j ;?>"><?php echo $dataa["units"];?></td>
+                                        <td class="text-end align-middle pe-3 pe-md-5"><?php echo formatNumber($dataa["total"]);?></td>
+                                        <td><button class="btn btn-dark w-100" onclick="ExBillCalculate(<?php echo $j ;?>);" data-bs-toggle="modal" data-bs-target="#staticBackdrop">Your Bill</button></td>
+                                    </tr>
+                                <?php
+                                }
+                                ?>
                             </table>
                         </div>
                     </div>
@@ -177,8 +197,34 @@ $dbms = new mysqli($dbserver, $dblocation, $dbpassword, $dbname, "3306");
                 <!-- Content End -->
             </div>
         </div>
-        <script src="script.js"></script>
-        <script src="bootstrap/bootstrap.min.js"></script>
+    </div>
+    <!-- Modal -->
+    <div class="modal modal-dialog modal-dialog-centered modal-dialog-scrollable fade" style="display: none;" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="staticBackdropLabel">title</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div id="modelbody" class="modal-body row">
+                content
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+            </div>
+        </div>
+    </div>
+    <script src="script.js"></script>
+    <script src="bootstrap/bootstrap.bundle.js"></script>
 </body>
 
 </html>
+
+<?php
+}else{
+?>
+<script>window.location = "index.php";</script>
+<?php
+}
+?>
